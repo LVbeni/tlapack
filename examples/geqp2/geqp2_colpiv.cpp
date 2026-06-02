@@ -60,7 +60,8 @@ void run(size_t m, size_t n, size_t r)
 
     // Arrays
     std::vector<T> tau(n);
-
+    n = m;
+    r = n;
     // Matrix
     std::vector<T> A_;
     auto A = new_matrix(A_, m, n);
@@ -89,14 +90,35 @@ void run(size_t m, size_t n, size_t r)
 
     // Generate two random matricies C, size mxr and D, size rxn,
     // and compute A_orig = C*D, which has rank r.
-    for (size_t j = 0; j < r; ++j) {
-        for (size_t i = 0; i < m; ++i)
-            C(i, j) = static_cast<T>(rand()) / static_cast<T>(RAND_MAX);
-    }
-    for (size_t j = 0; j < n; ++j) {
-        for (size_t i = 0; i < r; ++i)
-            D(i, j) = static_cast<T>(rand()) / static_cast<T>(RAND_MAX);
-    }
+    // for (size_t j = 0; j < r; ++j) {
+    //     for (size_t i = 0; i < m; ++i)
+    //         C(i, j) = static_cast<T>(rand()) / static_cast<T>(RAND_MAX);
+    // }
+    // for (size_t j = 0; j < n; ++j) {
+    //     for (size_t i = 0; i < r; ++i)
+    //         D(i, j) = static_cast<T>(rand()) / static_cast<T>(RAND_MAX);
+    // }
+
+    tlapack::laset(tlapack::Uplo::General, static_cast<T>(0), static_cast<T>(0),
+                   C);
+    tlapack::laset(tlapack::Uplo::General, static_cast<T>(0), static_cast<T>(0),
+                   D);
+
+    T cosine = static_cast<T>(-1.0 * cos(M_PI / 4));
+    T sine = static_cast<T>(sin(M_PI / 4));
+
+    tlapack::laset(tlapack::Uplo::Upper, cosine, static_cast<T>(1.0), D);
+
+    // set the diagonal of C to an increment of (pi/4)^2
+    for (size_t i = 0; i < r; ++i)
+        C(i, i) = static_cast<T>(pow(sine, i));
+
+    // Print matrices C and D for debugging
+    std::cout << std::endl << "Matrix C =";
+    printMatrix(C);
+    std::cout << std::endl << "Matrix D =";
+    printMatrix(D);
+
     tlapack::gemm(tlapack::Op::NoTrans, tlapack::Op::NoTrans, T(1), C, D, T(0),
                   A_orig);
 
@@ -226,8 +248,8 @@ int main(int argc, char** argv)
     int m, n, r;
 
     // Default arguments
-    m = (argc < 2) ? 7 : atoi(argv[1]);
-    n = (argc < 3) ? 5 : atoi(argv[2]);
+    m = (argc < 2) ? 6 : atoi(argv[1]);
+    n = (argc < 3) ? 6 : atoi(argv[2]);
     r = (argc < 4) ? 3 : atoi(argv[3]);
 
     srand(3);  // Init random seed

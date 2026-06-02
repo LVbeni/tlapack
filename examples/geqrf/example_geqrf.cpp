@@ -59,7 +59,7 @@ void run(size_t m, size_t n)
     tlapack::Create<matrix_t> new_matrix;
 
     // Turn it off if m or n are large
-    bool verbose = false;
+    bool verbose = true;
 
     // Arrays
     std::vector<T> tau(n);
@@ -93,7 +93,7 @@ void run(size_t m, size_t n)
         x(j, 0) = static_cast<T>(rand()) / static_cast<T>(RAND_MAX);
     }
 
-     if (m >= 3 && n >= 3) {
+    if (m >= 3 && n >= 3) {
         for (size_t j = 0; j < n; ++j)
             for (size_t i = 0; i < m; ++i)
                 A(i, j) = static_cast<T>(0);
@@ -205,6 +205,12 @@ void run(size_t m, size_t n)
     std::cout << std::endl;
     std::cout << "||b - A*x||_F/||A||_F = " << norm_residual;
     std::cout << std::endl;
+
+    // print out A
+    if (verbose) {
+        std::cout << std::endl << "A after QR factorization =";
+        printMatrix(A);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -213,8 +219,8 @@ int main(int argc, char** argv)
     int m, n;
 
     // Default arguments
-    m = (argc < 2) ? 199 : atoi(argv[1]);
-    n = (argc < 3) ? 151 : atoi(argv[2]);
+    m = (argc < 2) ? 3 : atoi(argv[1]);
+    n = (argc < 3) ? 3 : atoi(argv[2]);
 
     srand(3);  // Init random seed
 
@@ -225,25 +231,25 @@ int main(int argc, char** argv)
     run<float>(m, n);
     printf("-----------------------\n");
 
-    printf("run< double >( %d, %d )", m, n);
-    run<double>(m, n);
-    printf("-----------------------\n");
+    // printf("run< double >( %d, %d )", m, n);
+    // run<double>(m, n);
+    // printf("-----------------------\n");
 
-    printf("run< long double >( %d, %d )", m, n);
-    run<long double>(m, n);
-    printf("-----------------------\n");
+    // printf("run< long double >( %d, %d )", m, n);
+    // run<long double>(m, n);
+    // printf("-----------------------\n");
 
-    printf("run< complex<float> >( %d, %d )", m, n);
-    run<std::complex<float>>(m, n);
-    printf("-----------------------\n");
+    // printf("run< complex<float> >( %d, %d )", m, n);
+    // run<std::complex<float>>(m, n);
+    // printf("-----------------------\n");
 
-    printf("run< complex<double> >( %d, %d )", m, n);
-    run<std::complex<double>>(m, n);
-    printf("-----------------------\n");
+    // printf("run< complex<double> >( %d, %d )", m, n);
+    // run<std::complex<double>>(m, n);
+    // printf("-----------------------\n");
 
-    printf("run< complex<long double> >( %d, %d )", m, n);
-    run<std::complex<long double>>(m, n);
-    printf("-----------------------\n");
+    // printf("run< complex<long double> >( %d, %d )", m, n);
+    // run<std::complex<long double>>(m, n);
+    // printf("-----------------------\n");
 
     return 0;
 }
