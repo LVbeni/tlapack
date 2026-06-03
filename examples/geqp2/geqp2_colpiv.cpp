@@ -79,6 +79,7 @@ void run(size_t m, size_t n, size_t r)
     auto C = new_matrix(C_, m, r);
     std::vector<T> D_;
     auto D = new_matrix(D_, r, n);
+    // std::vector<T> Q
 
     // Initialize arrays with junk
     for (idx_t j = 0; j < n; ++j) {
@@ -104,8 +105,8 @@ void run(size_t m, size_t n, size_t r)
     tlapack::laset(tlapack::Uplo::General, static_cast<T>(0), static_cast<T>(0),
                    D);
 
-    T cosine = static_cast<T>(-1.0 * cos(M_PI / 4));
-    T sine = static_cast<T>(sin(M_PI / 4));
+    T cosine = static_cast<T>(-1.0 * cos(M_PI / 12));
+    T sine = static_cast<T>(sin(M_PI / 12));
 
     tlapack::laset(tlapack::Uplo::Upper, cosine, static_cast<T>(1.0), D);
 
@@ -214,8 +215,6 @@ void run(size_t m, size_t n, size_t r)
         }
     }
 
-    tlapack::lacpy(tlapack::UPPER_TRIANGLE, A_perm, R);
-
     // Preserve the final permuted matrix AP before forming the QR factors.
     tlapack::lacpy(tlapack::GENERAL, B, A_perm);
 
@@ -229,18 +228,45 @@ void run(size_t m, size_t n, size_t r)
     // Extract the upper-triangular R from the QR factorization for comparison.
     tlapack::lacpy(tlapack::UPPER_TRIANGLE, B, R);
 
+    // Form the explicit orthogonal matrix Q from the Householder factors.
+    tlapack::ung2r(B, tau);
+
+    // Compute the reconstruction accuracy ||AP - Q*R||.
+    tlapack::gemm(tlapack::Op::NoTrans, tlapack::Op::NoTrans, T(1), B, R,
+                  T(0), C);
+    for (idx_t j = 0; j < n; ++j) {
+        for (idx_t i = 0; i < m; ++i) {
+            C(i, j) = A_perm(i, j) - C(i, j);
+        }
+    }
+    real_t recon_error = tlapack::lange(tlapack::Norm::One, C);
+
+    // Compute the orthogonality error ||I - Q^H Q||.
+    tlapack::syrk(tlapack::Uplo::Upper, tlapack::Op::Trans, T(1), B,
+                  T(0), D);
+    for (idx_t j = 0; j < n; ++j)
+        D(j, j) -= static_cast<T>(1);
+    real_t orthogonality_error = tlapack::lansy(tlapack::Norm::One,
+                                                tlapack::Uplo::Upper, D);
+
     if (verbose) {
         std::cout << std::endl << "AP (final permuted matrix) =";
         printMatrix(A_perm);
         std::cout << std::endl << "R from geqr2 (upper triangle) =";
         printMatrix(R);
-        std::cout << std::endl << "Householder form of QR factorization =";
+        std::cout << std::endl << "Q from QR factorization =";
         printMatrix(B);
         std::cout << std::endl;
 
         printMatrix(A);
         std::cout << std::endl << "---end ------------------------------";
     }
+
+    std::cout << std::endl
+              << "Reconstruction error ||AP - Q*R|| = " << recon_error
+              << std::endl;
+    std::cout << "Orthogonality error ||I - Q^H Q|| = "
+              << orthogonality_error << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -248,17 +274,17 @@ int main(int argc, char** argv)
     int m, n, r;
 
     // Default arguments
-    m = (argc < 2) ? 6 : atoi(argv[1]);
-    n = (argc < 3) ? 6 : atoi(argv[2]);
+    m = (argc < 2) ? 7 : atoi(argv[1]);
+    n = (argc < 3) ? 7 : atoi(argv[2]);
     r = (argc < 4) ? 3 : atoi(argv[3]);
 
     srand(3);  // Init random seed
 
-    std::cout.precision(5);
+    std::cout.precision(17);
     std::cout << std::scientific << std::showpos;
 
-    printf("run< float  >( %d, %d, %d )", m, n, r);
-    run<float>(m, n, r);
+    printf("run< double >( %d, %d, %d )\n", m, n, r);
+    run<double>(m, n, r);
     printf("-----------------------\n");
 
     // printf("run< double >( %d, %d )", m, n);
