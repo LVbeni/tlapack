@@ -21,6 +21,16 @@ add_custom_command(
     "${CMAKE_CURRENT_BINARY_DIR}/geqr2/example_geqr2${CMAKE_EXECUTABLE_SUFFIX}"
     && echo ""
 )
+# add the example geqp2
+add_subdirectory( geqp2 )
+add_custom_command(
+  OUTPUT run-all-examples-cmd APPEND
+  COMMAND
+    echo "- example_geqp2 ----------------" &&
+    "${CMAKE_CURRENT_BINARY_DIR}/geqp2/example_geqp2${CMAKE_EXECUTABLE_SUFFIX}"
+    && echo ""
+)
+
 # add the example geqrtr
 add_subdirectory( geqrtr )
 add_custom_command(

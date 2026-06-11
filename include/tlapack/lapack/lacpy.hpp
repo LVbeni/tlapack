@@ -1,7 +1,7 @@
 /// @file lacpy.hpp
 /// @author Weslley S Pereira, University of Colorado Denver, USA
 /// @note Adapted from @see
-/// https://github.com/langou/latl/blob/master/include/lacpy.h
+// https://github.com/langou/latl/blob/master/include/lacpy.h
 //
 // Copyright (c) 2025, University of Colorado Denver. All rights reserved.
 //
@@ -13,6 +13,7 @@
 #define TLAPACK_LACPY_HH
 
 #include "tlapack/base/types.hpp"
+#include "tlapack/base/concepts.hpp"
 
 namespace tlapack {
 
