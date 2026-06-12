@@ -34,7 +34,7 @@ namespace tlapack {
         // constants
         const idx_t m = nrows(A);
         const idx_t n = ncols(A);
-        const real_t eps = std::numeric_limits<real_t>::epsilon();
+        const real_t eps = ulp<real_t>();
         const real_t safety_threshold = std::sqrt(eps);
 
         // Tracking vectors for column norms
